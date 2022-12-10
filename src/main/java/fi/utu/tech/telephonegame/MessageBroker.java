@@ -2,7 +2,9 @@ package fi.utu.tech.telephonegame;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TransferQueue;
 import fi.utu.tech.telephonegame.network.Network;
@@ -21,6 +23,7 @@ public class MessageBroker extends Thread {
 	private Network network;
 	private Resolver resolver;
 	private GuiIO gui_io;
+	public Set<UUID> processedMessage = new HashSet<UUID>();
 	// Defualt listening port
 	private final int rootServerPort = 8050;
 	// This might come into use
@@ -46,6 +49,19 @@ public class MessageBroker extends Thread {
 	 * 7. Return the processed message
 	 */
 	private Message process(Object procMessage) {
+		if (!(procMessage instanceof Message)) {
+			throw new IllegalArgumentException("incomingMessage cannot be null");
+		}
+		prevMessages.getId();
+
+
+		gui_io.setReceivedMessage(((Throwable) procMessage).getMessage());
+		Refiner refiner = new Refiner();
+		String refinedMessage = refiner.refineText(((Throwable) procMessage).getMessage());
+		Integer color = refiner.refineColor(((Message) procMessage).getColor());
+		gui_io.setSignal(color);
+		gui_io.setRefinedMessage(refinedMessage);
+
 		return null;
 	}
 

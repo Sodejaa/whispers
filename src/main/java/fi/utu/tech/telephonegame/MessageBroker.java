@@ -48,21 +48,22 @@ public class MessageBroker extends Thread {
 	 * 6. Show the refined message in the refined message text area
 	 * 7. Return the processed message
 	 */
-	private Message process(Object procMessage) {
+	private Message process(Message procMessage) {
 		if (!(procMessage instanceof Message)) {
 			throw new IllegalArgumentException("incomingMessage cannot be null");
 		}
 		prevMessages.getId();
 
 
-		gui_io.setReceivedMessage(((Throwable) procMessage).getMessage());
+		gui_io.setReceivedMessage(procMessage.getMessage());
 		Refiner refiner = new Refiner();
-		String refinedMessage = refiner.refineText(((Throwable) procMessage).getMessage());
-		Integer color = refiner.refineColor(((Message) procMessage).getColor());
-		gui_io.setSignal(color);
-		gui_io.setRefinedMessage(refinedMessage);
+		Message refinedMessage = new Message(procMessage.getMessage(), procMessage.getColor());
+		refinedMessage.setMessage(refiner.refineText((procMessage.getMessage())));
+		refinedMessage.setColor(refiner.refineColor(((Message) procMessage).getColor()));
+		gui_io.setSignal(refinedMessage.getColor());
+		gui_io.setRefinedMessage(refinedMessage.getMessage());
 
-		return null;
+		return refinedMessage;
 	}
 
 	/*

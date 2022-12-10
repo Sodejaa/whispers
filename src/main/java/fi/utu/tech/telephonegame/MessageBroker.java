@@ -1,6 +1,7 @@
 package fi.utu.tech.telephonegame;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Objects;
@@ -48,17 +49,19 @@ public class MessageBroker extends Thread {
 	 * 6. Show the refined message in the refined message text area
 	 * 7. Return the processed message
 	 */
-	private Message process(Message procMessage) {
+	private Message process(Object procMessage) {
 		if (!(procMessage instanceof Message)) {
 			throw new IllegalArgumentException("incomingMessage cannot be null");
 		}
+		
 		prevMessages.getId();
-
-
-		gui_io.setReceivedMessage(procMessage.getMessage());
+		gui_io.setReceivedMessage(((Throwable) procMessage).getMessage());
 		Refiner refiner = new Refiner();
-		Message refinedMessage = new Message(procMessage.getMessage(), procMessage.getColor());
-		refinedMessage.setMessage(refiner.refineText((procMessage.getMessage())));
+		Message refinedMessage = new Message(((Throwable) procMessage).getMessage(), ((Message) procMessage).getColor());
+
+
+
+		refinedMessage.setMessage(refiner.refineText((((Throwable) procMessage).getMessage())));
 		refinedMessage.setColor(refiner.refineColor(((Message) procMessage).getColor()));
 		gui_io.setSignal(refinedMessage.getColor());
 		gui_io.setRefinedMessage(refinedMessage.getMessage());
@@ -78,7 +81,16 @@ public class MessageBroker extends Thread {
 	 * 
 	 */
 	public void run() {
-
+		synchronized(this) {
+		while(true) {
+			Object obj = network.getInputQueue();
+			if (obj == null) {
+				continue;
+			}
+			Message processedMessage = process(this);
+			send(processedMessage);
+		}
+		}
 	}
 
 	/**

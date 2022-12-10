@@ -1,7 +1,12 @@
 package fi.utu.tech.telephonegame.network;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +40,15 @@ public class NetworkService extends Thread implements Network {
 	public void startListening(int serverPort) {
 		System.out.printf("I should start listening for peers at port %d%n", serverPort);
 		// TODO
-	}
+
+			try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+				System.out.printf("1");
+			} catch (IOException e) {
+			  System.err.println("Error listening on port " + serverPort);
+			  System.exit(1);
+			}
+		  }
+	
 
 	/**
 	 * This method will be called when connecting to a peer (other broken telephone
@@ -48,6 +61,23 @@ public class NetworkService extends Thread implements Network {
 	public void connect(String peerIP, int peerPort) throws IOException, UnknownHostException {
 		System.out.printf("I should connect myself to %s, port %d%n", peerIP, peerPort);
 		// TODO
+		try (Socket socket = new Socket(peerIP, peerPort)) {
+			// Create input and output streams for reading and writing to the peer
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+			
+			// Read data from the peer and write a response
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+			  out.println("Client received: " + inputLine);
+			}
+			
+			// Close the socket
+			socket.close();
+		  } catch (IOException e) {
+			System.err.println("Error connecting to " + peerIP + " on port " + peerPort);
+			System.exit(1);
+		  }
 	}
 
 	/**
@@ -59,6 +89,7 @@ public class NetworkService extends Thread implements Network {
 	private void send(Serializable out) {
 		// Send the object to all neighbouring nodes
 		// TODO
+
 	}
 
 	/*

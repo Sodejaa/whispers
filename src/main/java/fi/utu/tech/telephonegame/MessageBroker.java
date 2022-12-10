@@ -87,7 +87,7 @@ public class MessageBroker extends Thread {
 	 * @param message The Message object to be sent
 	 */
 	public void send(Message message) {
-		network.postMessage(message);
+		network.postMessage(message); 
 	}
 
 	/**

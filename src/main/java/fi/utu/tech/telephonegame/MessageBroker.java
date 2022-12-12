@@ -40,9 +40,9 @@ public class MessageBroker extends Thread {
 	}
 
 	/*
-	 * In the the process method you need to:
+	 * In the process method you need to:
 	 * 1. Test the type of the incoming object
-	 * 2. Keep track of messages that are alredy processed by this node
+	 * 2. Keep track of messages that are already processed by this node
 	 * 3. Show the incoming message in the received message text area
 	 * 4. Change the text and the color using the Refiner class
 	 * 5. Set the new color to the color area

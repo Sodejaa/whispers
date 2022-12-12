@@ -72,3 +72,4 @@ public interface Network {
 	 */
 	public TransferQueue<Object> getInputQueue();
 }
+	

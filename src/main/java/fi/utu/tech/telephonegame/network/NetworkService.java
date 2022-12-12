@@ -1,24 +1,36 @@
 package fi.utu.tech.telephonegame.network;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 
-public class NetworkService extends Thread implements Network {
+import javafx.scene.control.ListCell;
+
+public class NetworkService extends Thread implements Network, Serializable {
 	/*
 	 * Do not change the existing class variables
 	 * New variables can be added
 	 */
 	private TransferQueue<Object> inQueue = new LinkedTransferQueue<Object>(); // For messages incoming from network
 	private TransferQueue<Serializable> outQueue = new LinkedTransferQueue<Serializable>(); // For messages outgoing to network
+	public LinkedBlockingQueue<Socket> sockets = new LinkedBlockingQueue<Socket>();
+	public LinkedBlockingQueue<ObjectOutputStream> sentSockets = new LinkedBlockingQueue<ObjectOutputStream>();
+	// Joonaksen lista:
+	public List<ClientHandler> ClientHandler = new ArrayList<ClientHandler>();
 
 
 	/*
@@ -68,11 +80,13 @@ public class NetworkService extends Thread implements Network {
 		try {
 			// Create a new Socket instance and connect to the peer
 			Socket socket = new Socket(peerIP, peerPort);
-			
+			ClientHandler ch = new ClientHandler(socket, this);
+			ClientHandler.add(ch);
+
 			// Do something with the socket (e.g. send/receive data)
 		} catch (IOException e) {
 			// Handle exceptions
-			System.out.println("connect eror");
+			System.out.println("connect error");
 		}
 		
 	}
@@ -85,30 +99,12 @@ public class NetworkService extends Thread implements Network {
 	 */
 
 	private void send(Serializable out) {
-		// Get a list of all connected peers
-		List<> peers = getConnectedPeers();
-	
-		// Iterate over the list of peers
-		for (Peer peer : peers) {
-			try {
-				// Get the OutputStream for the current peer
-				OutputStream outputStream = peer.getOutputStream();
-	
-				// Create a new PrintWriter to write text data to the OutputStream
-				PrintWriter writer = new PrintWriter(outputStream, true);
-	
-				// Write the serializable object to the OutputStream
-				writer.println(out);
-	
-				// Flush the writer to ensure the object is sent
-				writer.flush();
-			} catch (IOException e) {
-				// Handle exceptions
-			}
+		// Joonas (Lähde)
+		for(ClientHandler i : ClientHandler) {
+			i.send(out);
 		}
 	}
 		
-
 	/*
 	 * Don't edit any methods below this comment
 	 * Contains methods to move data between Network and 

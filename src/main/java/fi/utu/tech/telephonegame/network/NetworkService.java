@@ -1,8 +1,8 @@
 package fi.utu.tech.telephonegame.network;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -38,17 +38,23 @@ public class NetworkService extends Thread implements Network {
 	 * 
 	 */
 	public void startListening(int serverPort) {
-		System.out.printf("I should start listening for peers at port %d%n", serverPort);
-		// TODO
-
-			try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
-				System.out.printf("1");
-			} catch (IOException e) {
-			  System.err.println("Error listening on port " + serverPort);
-			  System.exit(1);
+		try {
+			try (// Create a new ServerSocket instance
+			ServerSocket serverSocket = new ServerSocket(serverPort)) {
+				// Start listening for incoming connections
+				while (true) {
+					// Accept incoming connections and create a new socket for each connection
+					Socket socket = serverSocket.accept();
+					
+					
+					// Do something with the new socket (e.g. send/receive data)
+				}
 			}
-		  }
-	
+		} catch (IOException e) {
+			// Handle exceptions
+			System.out.println("start listening error");
+		}
+	}
 
 	/**
 	 * This method will be called when connecting to a peer (other broken telephone
@@ -59,25 +65,16 @@ public class NetworkService extends Thread implements Network {
 	 * @param peerPort The TCP port to connect to
 	 */
 	public void connect(String peerIP, int peerPort) throws IOException, UnknownHostException {
-		System.out.printf("I should connect myself to %s, port %d%n", peerIP, peerPort);
-		// TODO
-		try (Socket socket = new Socket(peerIP, peerPort)) {
-			// Create input and output streams for reading and writing to the peer
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+		try {
+			// Create a new Socket instance and connect to the peer
+			Socket socket = new Socket(peerIP, peerPort);
 			
-			// Read data from the peer and write a response
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) {
-			  out.println("Client received: " + inputLine);
-			}
-			
-			// Close the socket
-			socket.close();
-		  } catch (IOException e) {
-			System.err.println("Error connecting to " + peerIP + " on port " + peerPort);
-			System.exit(1);
-		  }
+			// Do something with the socket (e.g. send/receive data)
+		} catch (IOException e) {
+			// Handle exceptions
+			System.out.println("connect eror");
+		}
+		
 	}
 
 	/**
@@ -86,11 +83,31 @@ public class NetworkService extends Thread implements Network {
 	 * @param out The serializable object to be sent to all the connected nodes
 	 * 
 	 */
-	private void send(Serializable out) {
-		// Send the object to all neighbouring nodes
-		// TODO
 
+	private void send(Serializable out) {
+		// Get a list of all connected peers
+		List<> peers = getConnectedPeers();
+	
+		// Iterate over the list of peers
+		for (Peer peer : peers) {
+			try {
+				// Get the OutputStream for the current peer
+				OutputStream outputStream = peer.getOutputStream();
+	
+				// Create a new PrintWriter to write text data to the OutputStream
+				PrintWriter writer = new PrintWriter(outputStream, true);
+	
+				// Write the serializable object to the OutputStream
+				writer.println(out);
+	
+				// Flush the writer to ensure the object is sent
+				writer.flush();
+			} catch (IOException e) {
+				// Handle exceptions
+			}
+		}
 	}
+		
 
 	/*
 	 * Don't edit any methods below this comment

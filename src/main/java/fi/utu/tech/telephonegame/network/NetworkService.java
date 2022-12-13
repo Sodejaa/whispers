@@ -51,20 +51,12 @@ public class NetworkService extends Thread implements Network, Serializable {
 	 */
 	public void startListening(int serverPort) {
 		try {
-			try (// Create a new ServerSocket instance
-			ServerSocket serverSocket = new ServerSocket(serverPort)) {
-				// Start listening for incoming connections
-				while (true) {
-					// Accept incoming connections and create a new socket for each connection
-					Socket socket = serverSocket.accept();
-					
-					
-					// Do something with the new socket (e.g. send/receive data)
-				}
-			}
+			ServerSocket serverSocket = new ServerSocket(serverPort);
+			Server server = new Server(serverSocket, clientList, outQueue);
+			new Thread(server).start();
+
 		} catch (IOException e) {
-			// Handle exceptions
-			System.out.println("start listening error");
+			e.printStackTrace();
 		}
 	}
 

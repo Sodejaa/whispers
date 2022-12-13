@@ -50,25 +50,20 @@ public class MessageBroker extends Thread {
 	 * 7. Return the processed message
 	 */
 	private Message process(Object procMessage) {
-		if (!(procMessage instanceof Message)) {
-			throw new IllegalArgumentException("incomingMessage cannot be null");
-		}
-		
-		prevMessages.getId();
-		gui_io.setReceivedMessage(((Throwable) procMessage).getMessage());
-		Refiner refiner = new Refiner();
-		Message refinedMessage = new Message(((Throwable) procMessage).getMessage(), ((Message) procMessage).getColor());
+		if(!(procMessage instanceof Message) || prevMessages.containsKey(((Message) procMessage).getId()))
+		return null;
 
+	Message refinedmessage = (Message) procMessage;
+	prevMessages.put(refinedmessage.getId());
+	
+	gui_io.setReceivedMessage(refinedmessage.getMessage());
+	refinedmessage.setMessage(Refiner.refineText(refinedmessage.getMessage()));
+	gui_io.setRefinedMessage(refinedmessage.getMessage());
+	refinedmessage.setColor(Refiner.refineColor(refinedmessage.getColor()));
+	gui_io.setSignal(refinedmessage.getColor());
 
-
-		refinedMessage.setMessage(refiner.refineText((((Throwable) procMessage).getMessage())));
-		refinedMessage.setColor(refiner.refineColor(((Message) procMessage).getColor()));
-		gui_io.setSignal(refinedMessage.getColor());
-		gui_io.setRefinedMessage(refinedMessage.getMessage());
-
-		return refinedMessage;
-	}
-
+	return refinedmessage;
+}
 	/*
 	 * This run method will be executed in a separate thread automatically by the template
 	 * 
@@ -81,16 +76,13 @@ public class MessageBroker extends Thread {
 	 * 
 	 */
 	public void run() {
-		synchronized(this) {
-		while(true) {
-			Object obj = network.getInputQueue();
-			if (obj == null) {
-				continue;
-			}
-			Message processedMessage = process(this);
-			send(processedMessage);
-		}
-		}
+        while(true)	{
+            if (!(procQueue.isEmpty())) {
+                Message msg = process(procQueue.remove());
+                if(msg != null)
+                    send(msg);
+            }
+        }
 	}
 
 	/**

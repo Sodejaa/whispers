@@ -46,9 +46,9 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void send(Serializable env) {
+    public void send(Object put) {
         try {
-            ulosTulo.writeObject(env);
+            ulosTulo.writeObject(put);
             ulosTulo.flush();
         } catch (IOException e) {
             e.printStackTrace();

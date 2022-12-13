@@ -1,8 +1,11 @@
 package fi.utu.tech.telephonegame.network;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -74,7 +77,7 @@ public class NetworkService extends Thread implements Network, Serializable {
 			// Create a new Socket instance and connect to the peer
 			Socket socket = new Socket(peerIP, peerPort);
 			ClientHandler ch = new ClientHandler(socket, this);
-			ClientHandler.add(ch);
+			ch.start();
 
 			// Do something with the socket (e.g. send/receive data)
 		} catch (IOException e) {
@@ -89,13 +92,26 @@ public class NetworkService extends Thread implements Network, Serializable {
 	 * connected nodes)
 	 * 
 	 * @param out The serializable object to be sent to all the connected nodes
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 * 
 	 */
 
 	private void send(Serializable out) {
-		for (ClientHandler i : ClientHandler) {
-			i.send(out);
+		try {
+			FileInputStream file = new FileInputStream((String) out);
+			ObjectInputStream in = new ObjectInputStream(file);
+			Object bject1 = in.readObject();
+			for (ClientHandler i : ClientHandler) {
+				i.send(bject1);
+			} 
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
+
+		
+
+
 	}
 
 	/*

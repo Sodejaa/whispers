@@ -26,7 +26,7 @@ public class MessageBroker extends Thread {
 	private GuiIO gui_io;
 	public Set<UUID> processedMessage = new HashSet<UUID>();
 	// Defualt listening port
-	private final int rootServerPort = 4445;
+	private final int rootServerPort = 8050;
 	// This might come into use
 	private ConcurrentExpiringHashSet<UUID> prevMessages = new ConcurrentExpiringHashSet<UUID>(1000, 5000);
 

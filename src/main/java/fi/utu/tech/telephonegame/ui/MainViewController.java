@@ -73,9 +73,11 @@ public class MainViewController {
 		netSelectionPublic.setOnAction(event -> netType = NetworkType.PUBLIC);
 		netSelectionLocal.setSelected(true);
 		setRootNode.setOnAction(event -> rootNode = !rootNode);
-		ipAddresses.disableProperty().bind(setRootNode.selectedProperty().not().or(netSelectionLocal.selectedProperty()));
-		connectButton.textProperty().bind(Bindings.when(setRootNode.selectedProperty()).then("Start waiting for others").otherwise("Discover a peer and connect"));
-		
+		ipAddresses.disableProperty()
+				.bind(setRootNode.selectedProperty().not().or(netSelectionLocal.selectedProperty()));
+		connectButton.textProperty().bind(Bindings.when(setRootNode.selectedProperty()).then("Start waiting for others")
+				.otherwise("Discover a peer and connect"));
+
 	}
 
 	@FXML
@@ -101,7 +103,7 @@ public class MainViewController {
 	public void enableConnect() {
 		Platform.runLater(() -> connectButton.setDisable(false));
 	}
-	
+
 	public void setReceivedMessage(String text) {
 		Platform.runLater(() -> receivedMessage.setText(text));
 	}

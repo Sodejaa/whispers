@@ -1,6 +1,5 @@
 package fi.utu.tech.telephonegame.network;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,11 +12,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 
+import fi.utu.tech.telephonegame.Message;
 import javafx.scene.control.ListCell;
 
 public class NetworkService extends Thread implements Network, Serializable {
@@ -26,12 +27,13 @@ public class NetworkService extends Thread implements Network, Serializable {
 	 * New variables can be added
 	 */
 	private TransferQueue<Object> inQueue = new LinkedTransferQueue<Object>(); // For messages incoming from network
-	private TransferQueue<Serializable> outQueue = new LinkedTransferQueue<Serializable>(); // For messages outgoing to network
+	private TransferQueue<Serializable> outQueue = new LinkedTransferQueue<Serializable>(); // For messages outgoing to
+																							// network
 	public LinkedBlockingQueue<Socket> sockets = new LinkedBlockingQueue<Socket>();
 	public LinkedBlockingQueue<ObjectOutputStream> sentSockets = new LinkedBlockingQueue<ObjectOutputStream>();
 	// Joonaksen lista:
 	public List<ClientHandler> ClientHandler = new ArrayList<ClientHandler>();
-
+	private CopyOnWriteArrayList<ClientHandler> socketList = new CopyOnWriteArrayList<ClientHandler>();
 
 	/*
 	 * No need to change the construtor
@@ -40,20 +42,19 @@ public class NetworkService extends Thread implements Network, Serializable {
 		this.start();
 	}
 
-
-
 	/**
-	 * Creates a server instance and starts listening for new peers on specified port
+	 * Creates a server instance and starts listening for new peers on specified
+	 * port
 	 * The port used to listen incoming connections is provided by the template
 	 * 
 	 * @param serverPort Which port should we start to listen to?
 	 * 
 	 */
 	public void startListening(int serverPort) {
+		Server server;
 		try {
-			ServerSocket serverSocket = new ServerSocket(serverPort);
-			Server server = new Server(serverSocket, clientList, outQueue);
-			new Thread(server).start();
+			server = new Server(serverPort, this);
+			server.start();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -80,26 +81,26 @@ public class NetworkService extends Thread implements Network, Serializable {
 			// Handle exceptions
 			System.out.println("connect error");
 		}
-		
+
 	}
 
 	/**
-	 * This method is used to send the message to all connected neighbours (directly connected nodes)
+	 * This method is used to send the message to all connected neighbours (directly
+	 * connected nodes)
 	 * 
 	 * @param out The serializable object to be sent to all the connected nodes
 	 * 
 	 */
 
 	private void send(Serializable out) {
-		// Joonas (Lähde)
-		for(ClientHandler i : ClientHandler) {
+		for (ClientHandler i : ClientHandler) {
 			i.send(out);
 		}
 	}
-		
+
 	/*
 	 * Don't edit any methods below this comment
-	 * Contains methods to move data between Network and 
+	 * Contains methods to move data between Network and
 	 * MessageBroker
 	 * You might want to read still...
 	 */
@@ -138,6 +139,13 @@ public class NetworkService extends Thread implements Network, Serializable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void addToSocketList(ClientHandler s) {
+
+		System.out.println(s);
+		socketList.add(s);
+		System.out.println("Lisätty: " + socketList);
 	}
 
 }

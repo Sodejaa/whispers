@@ -50,22 +50,24 @@ public class MessageBroker extends Thread {
 	 * 7. Return the processed message
 	 */
 	private Message process(Object procMessage) {
-		if(!(procMessage instanceof Message) || prevMessages.containsKey(((Message) procMessage).getId()))
-		return null;
+		if (!(procMessage instanceof Message) || prevMessages.containsKey(((Message) procMessage).getId()))
+			return null;
 
-	Message refinedmessage = (Message) procMessage;
-	prevMessages.put(refinedmessage.getId());
-	
-	gui_io.setReceivedMessage(refinedmessage.getMessage());
-	refinedmessage.setMessage(Refiner.refineText(refinedmessage.getMessage()));
-	gui_io.setRefinedMessage(refinedmessage.getMessage());
-	refinedmessage.setColor(Refiner.refineColor(refinedmessage.getColor()));
-	gui_io.setSignal(refinedmessage.getColor());
+		Message refinedmessage = (Message) procMessage;
+		prevMessages.put(refinedmessage.getId());
 
-	return refinedmessage;
-}
+		gui_io.setReceivedMessage(refinedmessage.getMessage());
+		refinedmessage.setMessage(Refiner.refineText(refinedmessage.getMessage()));
+		gui_io.setRefinedMessage(refinedmessage.getMessage());
+		refinedmessage.setColor(Refiner.refineColor(refinedmessage.getColor()));
+		gui_io.setSignal(refinedmessage.getColor());
+
+		return refinedmessage;
+	}
+
 	/*
-	 * This run method will be executed in a separate thread automatically by the template
+	 * This run method will be executed in a separate thread automatically by the
+	 * template
 	 * 
 	 * In the run method you need to check:
 	 * 
@@ -76,28 +78,31 @@ public class MessageBroker extends Thread {
 	 * 
 	 */
 	public void run() {
-        while(true)	{
-            if (!(procQueue.isEmpty())) {
-                Message msg = process(procQueue.remove());
-                if(msg != null)
-                    send(msg);
-            }
-        }
+		while (true) {
+			if (!(procQueue.isEmpty())) {
+				Message msg = process(procQueue.remove());
+				if (msg != null)
+					send(msg);
+			}
+		}
 	}
 
 	/**
-	 * Adds Message object to the sending queue to be processed by the network component
+	 * Adds Message object to the sending queue to be processed by the network
+	 * component
 	 * You might need to make changes here
+	 * 
 	 * @param message The Message object to be sent
 	 */
 	public void send(Message message) {
-		network.postMessage(message); 
+		network.postMessage(message);
 	}
 
 	/**
 	 * Wraps the String into a new Message object
 	 * and adds it to the sending queue to be processed by the network component
 	 * Called when sending a new message
+	 * 
 	 * @param text The text to be wrapped and sent
 	 */
 	public void send(String text) {
@@ -124,20 +129,23 @@ public class MessageBroker extends Thread {
 			System.out.println("Root node");
 			// Use the default port for the server and start listening for peers
 			network.startListening(rootServerPort);
-			// As a root node, we are responsible for answering resolving requests - start resolver server
+			// As a root node, we are responsible for answering resolving requests - start
+			// resolver server
 			resolver.startResolverServer();
 			// No need to connect to anybody since we are the first node, the "root node"
 		} else {
 			System.out.println("Leaf node");
 			try {
-				// Broadcast a resolve request and wait for a resolver server (root node) to send peer configuration
+				// Broadcast a resolve request and wait for a resolver server (root node) to
+				// send peer configuration
 				PeerConfiguration addresses = resolver.resolve();
 				// Start listening for new peers on the port sent by the resolver server
 				network.startListening(addresses.listeningPort);
 				// Connect to a peer using addresses sent by the resolver server
 				network.connect(addresses.peerAddr, addresses.peerPort);
 			} catch (UnknownHostException | NumberFormatException e) {
-				System.err.println("Peer discovery failed (maybe there are no root nodes or broadcast messages are not supported on current network)");
+				System.err.println(
+						"Peer discovery failed (maybe there are no root nodes or broadcast messages are not supported on current network)");
 				gui_io.enableConnect();
 			} catch (IOException e) {
 				System.err.println("Error connecting to the peer");

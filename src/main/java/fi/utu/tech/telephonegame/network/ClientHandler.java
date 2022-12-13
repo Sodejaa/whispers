@@ -1,35 +1,57 @@
 package fi.utu.tech.telephonegame.network;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 
-public class ClientHandler implements Runnable {
+import fi.utu.tech.telephonegame.Message;
 
-    private Socket s;
-    private NetworkService t;
+public class ClientHandler extends Thread {
+    private Socket socket;
+    private ObjectOutputStream ulosTulo;
+    private ObjectInputStream sisaanTulo;
+    private NetworkService networkService;
 
-    public ClientHandler(Socket s, NetworkService t) {
-        this.s = s;
-        this.t = t;
+    public ClientHandler(Socket socket, NetworkService networkService) {
+        this.socket = socket;
+        this.networkService = networkService;
+        networkService.addToSocketList(this);
     }
-
-
-public void send(Serializable out) {
-
-    
-
-}
 
     public void run() {
-        try{
-            DataInputStream DataInput = new DataInputStream(s.getInputStream());
-            DataOutputStream DataOut = new DataOutputStream(s.getOutputStream());
-            String message = (String)DataInput.readUTF();
-            System.out.println(message);
-        } catch (Exception e){
-            System.out.println(e);
+        try {
+            InputStream iS = socket.getInputStream();
+            OutputStream oS = socket.getOutputStream();
+            ulosTulo = new ObjectOutputStream(oS);
+            sisaanTulo = new ObjectInputStream(iS);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        while (true) {
+            // Kootaan message olio envelope olion sisällöstä
+            try {
+                // envelopesta message olio
+                Message kirjekuori = (Message) (((Serializable) sisaanTulo.readObject()));
+                networkService.getInputQueue().add(kirjekuori);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
         }
     }
-}    
+
+    public void send(Serializable env) {
+        try {
+            ulosTulo.writeObject(env);
+            ulosTulo.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

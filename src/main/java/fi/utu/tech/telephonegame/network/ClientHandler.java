@@ -32,11 +32,10 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         }
         while (true) {
-            // Kootaan message olio envelope olion sisällöstä
+            // Refactor message from serializable
             try {
-                // envelopesta message olio
-                Message kirjekuori = (Message) (((Serializable) sisaanTulo.readObject()));
-                networkService.getInputQueue().add(kirjekuori);
+                Message packet = (Message) (((Serializable) sisaanTulo.readObject()));
+                networkService.getInputQueue().add(packet);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {

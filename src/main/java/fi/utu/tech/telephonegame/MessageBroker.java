@@ -1,10 +1,8 @@
 package fi.utu.tech.telephonegame;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TransferQueue;
@@ -95,6 +93,7 @@ public class MessageBroker extends Thread {
 	 * @param message The Message object to be sent
 	 */
 	public void send(Message message) {
+		prevMessages.put(message.getId());
 		network.postMessage(message);
 	}
 
@@ -107,6 +106,7 @@ public class MessageBroker extends Thread {
 	 */
 	public void send(String text) {
 		Message message = new Message(text, 0);
+		prevMessages.put(message.getId());
 		this.send(message);
 	}
 

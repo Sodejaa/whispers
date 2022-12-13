@@ -32,10 +32,7 @@ public class NetworkService extends Thread implements Network, Serializable {
 	private TransferQueue<Object> inQueue = new LinkedTransferQueue<Object>(); // For messages incoming from network
 	private TransferQueue<Serializable> outQueue = new LinkedTransferQueue<Serializable>(); // For messages outgoing to
 																							// network
-	public LinkedBlockingQueue<Socket> sockets = new LinkedBlockingQueue<Socket>();
-	public LinkedBlockingQueue<ObjectOutputStream> sentSockets = new LinkedBlockingQueue<ObjectOutputStream>();
-	// Joonaksen lista:
-	public List<ClientHandler> ClientHandler = new ArrayList<ClientHandler>();
+
 	private CopyOnWriteArrayList<ClientHandler> socketList = new CopyOnWriteArrayList<ClientHandler>();
 
 	/*
@@ -99,18 +96,12 @@ public class NetworkService extends Thread implements Network, Serializable {
 
 	private void send(Serializable out) {
 		try {
-			FileInputStream file = new FileInputStream((String) out);
-			ObjectInputStream in = new ObjectInputStream(file);
-			Object bject1 = in.readObject();
-			for (ClientHandler i : ClientHandler) {
-				i.send(bject1);
-			} 
+			for (ClientHandler i : socketList) {
+				i.send(out);
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-
-		
-
 
 	}
 

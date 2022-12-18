@@ -137,7 +137,7 @@ public class NetworkService extends Thread implements Network, Serializable {
 
 		System.out.println(s);
 		socketList.add(s);
-		System.out.println("Lisätty: " + socketList);
+		System.out.println("Added: " + socketList);
 	}
 
 }

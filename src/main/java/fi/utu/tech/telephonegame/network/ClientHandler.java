@@ -12,8 +12,8 @@ import fi.utu.tech.telephonegame.Message;
 
 public class ClientHandler extends Thread {
     private Socket socket;
-    private ObjectOutputStream ulosTulo;
-    private ObjectInputStream sisaanTulo;
+    private ObjectOutputStream outCome;
+    private ObjectInputStream inCome;
     private NetworkService networkService;
 
     public ClientHandler(Socket socket, NetworkService networkService) {
@@ -26,15 +26,15 @@ public class ClientHandler extends Thread {
         try {
             InputStream iS = socket.getInputStream();
             OutputStream oS = socket.getOutputStream();
-            ulosTulo = new ObjectOutputStream(oS);
-            sisaanTulo = new ObjectInputStream(iS);
+            outCome = new ObjectOutputStream(oS);
+            inCome = new ObjectInputStream(iS);
         } catch (IOException e) {
             e.printStackTrace();
         }
         while (true) {
             // Refactor message from serializable
             try {
-                Message packet = (Message) (((Serializable) sisaanTulo.readObject()));
+                Message packet = (Message) (((Serializable) inCome.readObject()));
                 networkService.getInputQueue().add(packet);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -47,8 +47,8 @@ public class ClientHandler extends Thread {
 
     public void send(Object put) {
         try {
-            ulosTulo.writeObject(put);
-            ulosTulo.flush();
+            outCome.writeObject(put);
+            outCome.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

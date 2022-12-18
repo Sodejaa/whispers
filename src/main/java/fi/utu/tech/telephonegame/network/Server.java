@@ -25,7 +25,6 @@ public class Server extends Thread {
                 ClientHandler s = new ClientHandler(socket, networkService);
                 s.start();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
